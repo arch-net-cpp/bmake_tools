@@ -9,6 +9,7 @@ import (
 	"errors"
 	"github.com/arch-net-cpp/bmake_tools/utils"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/spf13/cobra"
 	"os"
 	"text/template"
@@ -73,11 +74,19 @@ func workFlow(cmd *cobra.Command, args []string) {
 	if err != nil {
 		utils.ErrorFmtPrintf("create directory error: %v", err)
 	}
+	// git clone option
+
+	token := os.Getenv("GITHUB_TOKEN")
+	auth := &http.BasicAuth{
+		Username: "abc123", // yes, this can be anything except an empty string
+		Password: token,
+	}
 
 	// git clone arch_net
 	_, err = git.PlainClone(archnetDir, false, &git.CloneOptions{
 		URL:   genGitURL("arch_net"),
 		Depth: 1,
+		Auth:  auth,
 	})
 	if err != nil {
 		utils.ErrorFmtPrintf("git clone arch_net from: %v with error: %v ", genGitURL("arch_net"), err)
@@ -88,6 +97,7 @@ func workFlow(cmd *cobra.Command, args []string) {
 	_, err = git.PlainClone(bmakeDir, false, &git.CloneOptions{
 		URL:   genGitURL("bmake"),
 		Depth: 1,
+		Auth:  auth,
 	})
 	if err != nil {
 		utils.ErrorFmtPrintf("git clone bmake from: %v with error: %v ", genGitURL("bmake"), err)
@@ -98,6 +108,7 @@ func workFlow(cmd *cobra.Command, args []string) {
 	_, err = git.PlainClone(cpp3rdlibDir, false, &git.CloneOptions{
 		URL:   genGitURL("cpp3rdlib"),
 		Depth: 1,
+		Auth:  auth,
 	})
 	if err != nil {
 		utils.ErrorFmtPrintf("git clone cpp3rdlib from: %v with error: %v ", genGitURL("cpp3rdlib"), err)
